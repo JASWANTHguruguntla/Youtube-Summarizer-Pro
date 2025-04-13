@@ -56,6 +56,22 @@ def extract_transcript_details(youtube_video_url: str) -> str:
             st.error("❌ Invalid YouTube URL. Please check the link format.")
             return None
         
+        # List of fallback proxies (rotate through these)
+        proxy_list = [
+            {'http': 'http://138.199.48.1:8443', 'https': 'http://138.199.48.1:8443'},
+            {'http': 'http://209.126.6.159:80', 'https': 'http://209.126.6.159:80'},
+            # Add more proxies here
+            None  # Last resort try without proxy
+        ]
+        
+        for proxy in proxy_list:
+            try:
+                transcript = YouTubeTranscriptApi.get_transcript(video_id, proxies=proxy)
+                return " ".join([t["text"] for t in transcript])
+            except:
+                continue  # Try next proxy
+        
+        # If all proxies fail, try direct
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         return " ".join([t["text"] for t in transcript])
     
