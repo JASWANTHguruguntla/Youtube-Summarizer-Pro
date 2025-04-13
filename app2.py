@@ -4,6 +4,23 @@ import os
 import google.generativeai as genai
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
+from googleapiclient.discovery import build
+
+def get_transcript_with_youtube_api(video_id):
+    youtube = build('youtube', 'v3', developerKey=os.getenv("YOUTUBE_API_KEY"))
+    
+    # First check if captions are available
+    captions = youtube.captions().list(
+        part="snippet",
+        videoId=video_id
+    ).execute()
+    
+    if not captions.get('items'):
+        return None
+    
+    # Then fetch the transcript (this part is more complex)
+    # Note: Downloading actual captions requires OAuth and additional permissions
+    # You might need to combine with the transcript API
 # Load environment variables
 load_dotenv()
 
