@@ -5,16 +5,16 @@ import google.generativeai as genai
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
 from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api.proxies import WebshareProxyConfig
+from youtube_transcript_api.proxies import GenericProxyConfig
 
 ytt_api = YouTubeTranscriptApi(
-    proxy_config=WebshareProxyConfig(
-        proxy_username="<proxy-username>",
-        proxy_password="<proxy-password>",
+    proxy_config=GenericProxyConfig(
+        http_url="http://user:pass@my-custom-proxy.org:port",
+        https_url="https://user:pass@my-custom-proxy.org:port",
     )
 )
 
-# all requests done by ytt_api will now be proxied through Webshare
+# all requests done by ytt_api will now be proxied using the defined proxy URLs
 ytt_api.fetch(video_id)
 # Load environment variables
 load_dotenv()
