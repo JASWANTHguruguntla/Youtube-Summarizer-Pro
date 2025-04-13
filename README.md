@@ -1,5 +1,5 @@
 # **YouTube Video Summarizer Pro** 📝🎬  
-**AI-powered tool to convert YouTube videos into concise summaries**  
+**AI-powered tool to convert YouTube videos into concise summaries.**  
 
 ## **Table of Contents**  
 1. [Project Overview](#project-overview)  
