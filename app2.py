@@ -4,9 +4,6 @@ import os
 import google.generativeai as genai
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
-from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api.proxies import GenericProxyConfig
-
 # Load environment variables
 load_dotenv()
 
@@ -51,15 +48,7 @@ def extract_transcript_details(youtube_video_url: str) -> str:
     except Exception as e:
         st.error(f"⚠️ Error fetching transcript: {str(e)}")
         return None
-ytt_api = YouTubeTranscriptApi(
-    proxy_config=GenericProxyConfig(
-        http_url="http://user:pass@my-custom-proxy.org:port",
-        https_url="https://user:pass@my-custom-proxy.org:port",
-    )
-)
 
-# all requests done by ytt_api will now be proxied using the defined proxy URLs
-ytt_api.fetch(video_id)
 @st.cache_data(show_spinner=False)
 def generate_gemini_content(transcript_text: str, prompt: str) -> str:
     """Generate summary using Gemini with error handling."""
