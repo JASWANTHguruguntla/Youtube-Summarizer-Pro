@@ -16,7 +16,7 @@
 ---
 
 ## **1. Project Overview**  
-This tool extracts transcripts from YouTube videos and generates AI-powered summaries using **Google's Gemini Pro** model. Built with:  
+This tool extracts transcripts from YouTube videos and Generates AI-powered summaries using **Google's Gemini Pro** model. Built with:  
 - **Python** (Backend logic)  
 - **Streamlit** (Web interface)  
 - **YouTube Transcript API** (Transcript extraction)  
