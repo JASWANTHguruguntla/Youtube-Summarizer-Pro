@@ -171,4 +171,3 @@ docker run -p 8501:8501 youtube-summarizer
 
 --- 
 
-Would you like me to generate a `README.md` file from this documentation? 😊
