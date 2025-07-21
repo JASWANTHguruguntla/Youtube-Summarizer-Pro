@@ -34,7 +34,7 @@ def extract_transcript_details(youtube_video_url: str) -> str:
         if not video_id:
             st.error("❌ Invalid YouTube URL.")
             return None
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        transcript = YouTubeTranscriptApi().get_transcript(video_id)
         return " ".join([t["text"] for t in transcript])
     except (TranscriptsDisabled, NoTranscriptFound):
         st.error("🔇 No transcript available for this video.")
