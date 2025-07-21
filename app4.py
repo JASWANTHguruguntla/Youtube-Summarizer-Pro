@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 import os
 import google.generativeai as genai
 from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api.proxies import WebshareProxyConfig
 from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound
+from youtube_transcript_api.proxies import WebshareProxyConfig
 
 # Load environment variables
 load_dotenv()
@@ -21,8 +21,15 @@ You are a YouTube video summarizer. Given a transcript, generate a structured su
 Keep the summary under 250 words. Transcript:
 """
 
+# --- Proxy Config ---
+proxy_config = WebshareProxyConfig(
+    proxy_username="jaswanthg",
+    proxy_password="jashu7896"
+)
+
 # --- Helper Functions ---
 def extract_video_id(url: str) -> str:
+    """Extract video ID from various YouTube URL formats."""
     if "youtu.be/" in url:
         return url.split("youtu.be/")[1].split("?")[0]
     elif "v=" in url:
@@ -33,20 +40,15 @@ def extract_video_id(url: str) -> str:
 
 @st.cache_data(show_spinner=False)
 def extract_transcript_details(youtube_video_url: str) -> str:
+    """Fetch and concatenate YouTube transcript with proxy support."""
     try:
         video_id = extract_video_id(youtube_video_url)
         if not video_id:
             st.error("❌ Invalid YouTube URL. Please check the link format.")
             return None
 
-        # Setup Webshare Proxy
-        proxy_config = WebshareProxyConfig(
-            proxy_username="jaswanthg",  # Replace with your actual Webshare username
-            proxy_password="jashu7896"   # Replace with your actual Webshare password
-        )
-
+        # Use proxy-enabled instance
         ytt_api = YouTubeTranscriptApi(proxy_config=proxy_config)
-
         transcript = ytt_api.get_transcript(video_id)
         return " ".join([t["text"] for t in transcript])
 
@@ -59,6 +61,7 @@ def extract_transcript_details(youtube_video_url: str) -> str:
 
 @st.cache_data(show_spinner=False)
 def generate_gemini_content(transcript_text: str, prompt: str) -> str:
+    """Generate summary using Gemini with error handling."""
     try:
         model = genai.GenerativeModel("gemini-2.5-pro")
         response = model.generate_content(prompt + transcript_text)
@@ -70,12 +73,13 @@ def generate_gemini_content(transcript_text: str, prompt: str) -> str:
 # --- Streamlit UI ---
 st.set_page_config(page_title="YouTube Summarizer Pro", page_icon="📝")
 
+# Sidebar for settings
 with st.sidebar:
     st.header("⚙️ Settings")
-    api_key = st.text_input("🔑 Google API Key", 
-                          value=os.getenv("GOOGLE_API_KEY", ""),
-                          type="password",
-                          help="Overrides .env if provided")
+    api_key = st.text_input("🔑 Google API Key",
+                            value=os.getenv("GOOGLE_API_KEY", ""),
+                            type="password",
+                            help="Overrides .env if provided")
     
     if api_key:
         genai.configure(api_key=api_key)
@@ -89,21 +93,25 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("🛠️ Made with [Gemini](https://ai.google.dev/) & [Streamlit](https://streamlit.io/)")
 
+# Main interface
 st.title("🎬 YouTube Video Summarizer Pro")
 st.caption("Transform long videos into concise notes with AI")
 
+# URL input
 youtube_link = st.text_input(
     "🔗 Paste YouTube URL",
     placeholder="https://www.youtube.com/watch?v=...",
     help="Supports regular links and youtu.be shortcuts"
 )
 
+# Dynamic prompt
 prompt = DEFAULT_PROMPT
 if summary_length == "Short (100 words)":
     prompt = prompt.replace("250 words", "100 words")
 elif summary_length == "Detailed (500 words)":
     prompt = prompt.replace("250 words", "500 words")
 
+# Show video thumbnail
 if youtube_link:
     video_id = extract_video_id(youtube_link)
     if video_id:
@@ -120,24 +128,29 @@ if youtube_link:
                 caption="Video Thumbnail (Fallback)"
             )
 
+# Button: Generate Summary
 if st.button("✨ Generate Summary", type="primary"):
     if not youtube_link:
         st.warning("Please enter a YouTube URL")
     else:
         with st.status("🔍 Processing video...", expanded=True) as status:
+            # Step 1: Get transcript
             st.write("📜 Fetching transcript...")
             transcript_text = extract_transcript_details(youtube_link)
-
+            
             if transcript_text:
+                # Step 2: Generate summary
                 st.write("🧠 Generating AI summary...")
                 summary = generate_gemini_content(transcript_text, prompt)
-
+                
                 status.update(label="✅ Processing complete!", state="complete")
-
+                
                 if summary:
+                    # Display summary
                     st.subheader("📋 Summary")
                     st.markdown(summary)
-
+                    
+                    # Download options
                     col1, col2 = st.columns(2)
                     with col1:
                         st.download_button(
@@ -151,5 +164,6 @@ if st.button("✨ Generate Summary", type="primary"):
                             st.cache_data.clear()
                             st.rerun()
 
+# Footer
 st.markdown("---")
 st.caption("💡 Tip: For long videos (>30 mins), the transcript might be truncated due to API limits.")
